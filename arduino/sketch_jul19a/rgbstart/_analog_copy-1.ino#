@@ -1,0 +1,36 @@
+// ----- arduino_rgb_bot.ino -----
+#include <Arduino.h>
+
+const int pinR = 8;   // PWM-канал для красного
+const int pinG = 9;   // PWM-канал для зелёного
+const int pinB = 10;  // PWM-канал для синего
+int r, g, b;
+
+void setRGB(int _r, int _g, int _b); // ← прототип функции
+
+void setupAnalog() {
+  pinMode(pinR, OUTPUT);
+  pinMode(pinG, OUTPUT);
+  pinMode(pinB, OUTPUT);
+  // Изначально — свет выключен
+  setRGB(0, 0, 0);
+}
+
+void setRGB(int _r, int _g, int _b) {
+  if (!_r)
+  {
+    Serial.println("Ex: setRGB: _r is zero, skipping");
+    return;
+  }
+  analogWrite(pinR, _r);
+  analogWrite(pinG, _g);
+  analogWrite(pinB, _b);
+  r = _r;
+  g = _g;
+  b = _b; // Сохраняем значения RGB для отладки
+  //Отладочная строка для вывода значений RGB
+  Serial.print("RGB: ");
+  //String out = String(r) + ", " + String(g) + ", " + String(b);
+  Serial.println(String(r) + ", " + String(g) + ", " + String(b));
+  //delay(500);
+}

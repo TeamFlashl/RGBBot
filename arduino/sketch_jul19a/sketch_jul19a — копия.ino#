@@ -1,0 +1,46 @@
+// ----- arduino_rgb_bot.ino -----
+#include <Arduino.h>
+
+const int pinR = 8;   // PWM-канал для красного
+const int pinG = 9;  // PWM-канал для зелёного
+const int pinB = 10;  // PWM-канал для синего
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(pinR, OUTPUT);
+  pinMode(pinG, OUTPUT);
+  pinMode(pinB, OUTPUT);
+  // Изначально — свет выключен
+  analogWrite(pinR, 0);
+  analogWrite(pinG, 0);
+  analogWrite(pinB, 0);
+}
+
+void loop() {
+  /*
+  if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n');
+    cmd.trim();
+    // Ожидаем команду в формате "R,G,B"
+    int values[3] = {0,0,0};
+    int idx = 0;
+    char *ptr = strtok((char*)cmd.c_str(), ",");
+    while (ptr && idx < 3) {
+      values[idx++] = constrain(atoi(ptr), 0, 255);
+      ptr = strtok(NULL, ",");
+    }
+    // Устанавливаем ШИМ
+    analogWrite(pinR, values[0]);
+    analogWrite(pinG, values[1]);
+    analogWrite(pinB, values[2]);
+    // Отвечаем подтверждением
+    Serial.print("OK:");
+    Serial.print(values[0]); Serial.print(",");
+    Serial.print(values[1]); Serial.print(",");
+    Serial.println(values[2]);
+  }
+  */
+  analogWrite(pinR, 100);
+  analogWrite(pinG, 0);
+  analogWrite(pinB, 0);
+}
