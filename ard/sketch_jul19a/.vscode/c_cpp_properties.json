@@ -1,0 +1,10 @@
+{"includePath": [
+
+     "C:\\Users\\Evgen\\Documents\\Arduino\\libraries\\FastLED\\src\\platforms\\wasm\\compiler",
+
+     "C:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/standard",
+
+     "${workspaceFolder}/**"
+
+]
+}
