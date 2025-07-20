@@ -6,6 +6,9 @@ import serial
 import time 
 
 from config import TOKEN
+# Простая клавиатура
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton
+import threading
 
 # Настройки
 TOKEN = config.TOKEN
@@ -16,37 +19,31 @@ BAUDRATE = 9600
 bot = telebot.TeleBot(TOKEN)
 try:
     ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=1)
-    ser.write(b"128\n")  # Отправляем команду на Arduino для установки цвета CYAN
     print(f"Открыт последовательный порт: {SERIAL_PORT} с baudrate {BAUDRATE}")
     time.sleep(2)  # дать Arduino время перезагрузиться
 except Exception as e:
     print("Не получается открыть последовательный порт:", e)
     exit(1)
 
-# Простая клавиатура
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
 # Define menu items and their commands
 menuItems = {
     "🔴 Красный": {"command": 1,"visible": True},
     "🟢 Зелёный": {"command": 2,"visible": True},
     "🔵 Синий": {"command": 3,"visible": True},
-    "⚪️ Белый": {"command": 4,"visible": True},
+    "⚪️ Белый": {"command": 7,"visible": True},
     "⚫️ Чёрный": {"command": 0,"visible": True},
     "📁 Папка": {"visible": False, "submenu": {
-        "⚪️ Белый": {"command": 4,"visible": True},
+        "⚪️ Белый": {"command": 7,"visible": True},
         "⚫️ Чёрный": {"command": 0,"visible": True}
     }}
 }
 
 markup = ReplyKeyboardMarkup(resize_keyboard=True)
-markup.row_width = 3  # Количество кнопок в строке
-while len(menuItems) > 0:
-    for text, item in list(menuItems.items()):
-        if item["visible"]:
-            markup.add(KeyboardButton(text))
-            del menuItems[text]  # Удаляем элемент после добавления кнопки
-            break  # Прерываем цикл, чтобы не добавлять больше одной кнопки за итерацию
+markup.max_row_keys = 3  # Количество кнопок в строке
+for text, item in menuItems.items():
+    if item["visible"]:
+        markup.add(KeyboardButton(text))
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -68,69 +65,40 @@ def custom_rgb(message):
                 raise ValueError
     except:
         bot.reply_to(message, "Значения должны быть числами 0–255")
-    #if text in menuItems:
-    #    M_send_to_arduino(menuItems[text]["command"], message)
+    if text in menuItems:
+        M_send_to_arduino(menuItems[text]["command"], message)
 
 @bot.message_handler(func=lambda m: True)
 def choose_color(message):
-    text = message.text.lower()
+    text = message.text
     bot.reply_to(message, "Вы выбрали цвет: " + text)
 
     if menuItems.get(text):
         M_send_to_arduino(menuItems.get(text)["command"], message)
-    """
-    if "красн" in text:
-        M_send_to_arduino(1, message)
-    elif "зелёный мигалка" in text:
-        M_send_to_arduino(130, message)
-    elif "зелён" in text:
-        M_send_to_arduino(2, message)
-    elif "син" in text:
-        M_send_to_arduino(3, message)
-    elif "бел" in text:
-        M_send_to_arduino(4, message)
-    elif "выкл" in text:
-        M_send_to_arduino(0, message)
-    elif "мигалка" in text:
-        M_send_to_arduino(130, message)
-    elif "131" in text:
-        M_send_to_arduino(131, message)
     else:
-        M_send_to_arduino(text, message)
-        # bot.reply_to(message, "Не понял команду, выберите цвет на клавиатуре или /rgb R G B")
-    """
+        bot.reply_to(message, "Не понял команду, выберите цвет на клавиатуре")
 
-
-def M_send_to_arduino(type, message):
-    cmd = f"{type}\n"  # Формируем команду для Arduino
+def read_arduino_response(message):
     try:
-        ser.write(cmd.encode())  # TODO TEST отправить число 3
-        # Ждем ответа от Arduino
-        time.sleep(0.5)
-
-        resp = ser.readline().decode().strip()
-        print(f"Ответ от Arduino для отладки: {resp}")  # Для отладки
-        # Проверяем ответ от Arduino
-        #if resp.startswith("OK"):
-        #    bot.reply_to(message, f"Установлен цвет TYPE={type}")
-        #else:
-        #    bot.reply_to(message, "Нет ответа от Arduino1")
-    except Exception as e:
-        bot.reply_to(message, f"Ошибка отправки на Arduino: {e}")
-
-"""
-def send_mode1_to_arduino(message): # TODO ??
-    try:
-        ser.write(b"mode1\n")
         time.sleep(0.1)
         resp = ser.readline().decode().strip()
-        if resp.startswith("OK"):
-            bot.reply_to(message, "Включён режим: Зелёный мигалка")
-        else:
-            bot.reply_to(message, "Нет ответа от Arduino")
+        print(f"Ответ от Arduino для отладки: {resp}")
+        # Uncomment if you want to send response back to user
+        #if resp["Response"]:
+        #    bot.reply_to(message, f"Ответ от Arduino: {resp["Response"]}")
+    except Exception as e:
+        print(f"Ошибка чтения с Arduino: {e}")
+
+def M_send_to_arduino(type, message):
+    cmd = f"{type}"  # Формируем команду для Arduino
+    try:
+        ser.write(cmd.encode())
+        # Start response reading in separate thread
+        thread = threading.Thread(target=read_arduino_response, args=(message,))
+        thread.daemon = True
+        thread.start()
     except Exception as e:
         bot.reply_to(message, f"Ошибка отправки на Arduino: {e}")
-"""
 
 if __name__ == '__main__':
     print("Бот запущен...")

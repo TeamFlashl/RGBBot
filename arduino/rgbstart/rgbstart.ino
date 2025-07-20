@@ -77,14 +77,15 @@ void setup() {
 }
 
 void loop() { 
-  //setRGB(0, 255, 255);
+  setRGB(0, 0, 0); // выключаем ленту, если ничего не пришло
 
   if (Serial.available()) {     // если что то прислали
-    setRGB(0, 255, 255);
-    delay(10);
+    setRGB(0, 0, 255);
     ledMode = Serial.parseInt();    // парсим в тип данных int
     change_mode(ledMode);           // меняем режим через change_mode (там для каждого режима стоят цвета и задержки)
+    Serial.flush(); // очищаем буфер после отправки команды
   }
+
   switch (ledMode) {
     case 0: M_color(0, 0, 0); break;            // off 
     case 1: M_color(255, 0, 0); break; // RED
@@ -127,8 +128,9 @@ void change_mode(int newmode) {
     case 44: thisdelay = 100; break;                    // Strobe
   }
   bouncedirection = 0;
-  M_color(0, 0, 0);
   ledMode = newmode;
+  Serial.println(String(newmode) + " +"); // отправляем номер режима обратно в бот
+  Serial.flush(); // очищаем буфер после отправки команды
 }
 
 
