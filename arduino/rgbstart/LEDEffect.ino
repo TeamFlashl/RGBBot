@@ -29,10 +29,8 @@ void pulse_one_color_all() {              //-m10-PULSE BRIGHTNESS ON ALL LEDS TO
   if (safeDelay(thisdelay)) return;
 }
 
-void M_color(int cred, int cgrn, int cblu) {       //-SET ALL LEDS TO ONE COLOR
+void setColor(int cred, int cgrn, int cblu) {       //-SET ALL LEDS TO ONE COLOR
   for (int i = 0 ; i < ledCount; i++ ) {
-    setRGB(0, i, 255);
-    delay(10);
     leds[i].setRGB( cred, cgrn, cblu);
   }
   LEDS.show();
@@ -50,6 +48,7 @@ boolean safeDelay(int delTime) {
   return false;
 }
 
+/*
 void M_flash() {
   static bool redState = true;       // текущее состояние: true = красный, false = синий
   static uint32_t lastChange = 0;         // время последнего переключения
@@ -82,7 +81,7 @@ void M_flash() {
     }
   }
 }
-
+*/
 /*
 void rainbow_loop() {                        //-m3-LOOP HSV RAINBOW
   idex++;

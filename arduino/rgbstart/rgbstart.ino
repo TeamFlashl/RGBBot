@@ -83,24 +83,24 @@ void loop() {
     setRGB(0, 0, 255);
     ledMode = Serial.parseInt();    // парсим в тип данных int
     change_mode(ledMode);           // меняем режим через change_mode (там для каждого режима стоят цвета и задержки)
-    Serial.flush(); // очищаем буфер после отправки команды
+    //Serial.flush(); // очищаем буфер после отправки команды
   }
 
   switch (ledMode) {
-    case 0: M_color(0, 0, 0); break;            // off 
-    case 1: M_color(255, 0, 0); break; // RED
-    case 2: M_color(0, 255, 0); break; // GREEN для отладки
-    case 3: M_color(0, 0, 255); break; // BLUE
-    case 4: M_color(255, 255, 0); break; // YELLOW
-    case 5: M_color(255, 0, 255); break; // MAGENTA
-    case 6: M_color(0, 255, 255); break; // CYAN
-    case 7: M_color(255, 255, 255); break; // WHITE
-    case 8: M_color(255, 0, 0); break; // RED
+    case 0: setColor(0, 0, 0); break;            // off 
+    case 1: setColor(255, 0, 0); break; // RED
+    case 2: setColor(0, 255, 0); break; // GREEN для отладки
+    case 3: setColor(0, 0, 255); break; // BLUE
+    case 4: setColor(255, 255, 0); break; // YELLOW
+    case 5: setColor(255, 0, 255); break; // MAGENTA
+    case 6: setColor(0, 255, 255); break; // CYAN
+    case 7: setColor(255, 255, 255); break; // WHITE
+    case 8: setColor(255, 0, 0); break; // RED
     case 50: pulse_one_color_all(); break;//color(255, 0, 255); break;            // цвет    
-    case 128: M_color(246,118,142); break; // pink 
+    case 128: setColor(246,118,142); break; // pink 
 
-    case 129: M_color(255, 165, 0); break; // orange
-    case 130: M_flash(); break; 
+    case 129: setColor(255, 165, 0); break; // orange
+    //case 130: M_flash(); break; 
     case 131: fill_solid(leds, LED_COUNT, CRGB::Cyan); break;  // Устанавливаем первый светодиод в цвет CYAN
   }
 }
@@ -129,8 +129,8 @@ void change_mode(int newmode) {
   }
   bouncedirection = 0;
   ledMode = newmode;
-  Serial.println(String(newmode) + " +"); // отправляем номер режима обратно в бот
-  Serial.flush(); // очищаем буфер после отправки команды
+  //Serial.println(String(newmode) + " +"); // отправляем номер режима обратно в бот
+  //Serial.flush(); // очищаем буфер после отправки команды
 }
 
 
