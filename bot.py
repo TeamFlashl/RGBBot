@@ -76,9 +76,8 @@ def choose_color(message):
     text = message.text.lower()
     bot.reply_to(message, "Вы выбрали цвет: " + text)
 
-    if (menuItems.get(text)) {
-        M_send_to_arduino(menuItems.get(text).command, message)
-    }
+    if menuItems.get(text):
+        M_send_to_arduino(menuItems.get(text)["command"], message)
     """
     if "красн" in text:
         M_send_to_arduino(1, message)
