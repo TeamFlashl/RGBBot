@@ -16,20 +16,37 @@ BAUDRATE = 9600
 bot = telebot.TeleBot(TOKEN)
 try:
     ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=1)
+    ser.write(b"128\n")  # Отправляем команду на Arduino для установки цвета CYAN
     print(f"Открыт последовательный порт: {SERIAL_PORT} с baudrate {BAUDRATE}")
     time.sleep(2)  # дать Arduino время перезагрузиться
 except Exception as e:
     print("Не получается открыть последовательный порт:", e)
-    # exit(1)
+    exit(1)
 
 # Простая клавиатура
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
-markup = ReplyKeyboardMarkup(resize_keyboard=True)
-markup.row(KeyboardButton("🔴 Красный"), KeyboardButton("🟢 Зелёный"), KeyboardButton("🔵 Синий"))
-markup.row(KeyboardButton("⚪️ Белый"), KeyboardButton("⚫️ Чёрный"))
-markup.row(KeyboardButton("🔴 мигалка 🔵"))
+# Define menu items and their commands
+menuItems = {
+    "🔴 Красный": {"command": 1,"visible": True},
+    "🟢 Зелёный": {"command": 2,"visible": True},
+    "🔵 Синий": {"command": 3,"visible": True},
+    "⚪️ Белый": {"command": 4,"visible": True},
+    "⚫️ Чёрный": {"command": 0,"visible": True},
+    "📁 Папка": {"visible": False, "submenu": {
+        "⚪️ Белый": {"command": 4,"visible": True},
+        "⚫️ Чёрный": {"command": 0,"visible": True}
+    }}
+}
 
+markup = ReplyKeyboardMarkup(resize_keyboard=True)
+markup.row_width = 3  # Количество кнопок в строке
+while len(menuItems) > 0:
+    for text, item in list(menuItems.items()):
+        if item["visible"]:
+            markup.add(KeyboardButton(text))
+            del menuItems[text]  # Удаляем элемент после добавления кнопки
+            break  # Прерываем цикл, чтобы не добавлять больше одной кнопки за итерацию
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -51,15 +68,18 @@ def custom_rgb(message):
                 raise ValueError
     except:
         bot.reply_to(message, "Значения должны быть числами 0–255")
-        return
-    # send_to_arduino(r, g, b, message)
-    M_send_to_arduino(type, message)
+    #if text in menuItems:
+    #    M_send_to_arduino(menuItems[text]["command"], message)
 
 @bot.message_handler(func=lambda m: True)
 def choose_color(message):
     text = message.text.lower()
     bot.reply_to(message, "Вы выбрали цвет: " + text)
 
+    if (menuItems.get(text)) {
+        M_send_to_arduino(menuItems.get(text).command, message)
+    }
+    """
     if "красн" in text:
         M_send_to_arduino(1, message)
     elif "зелёный мигалка" in text:
@@ -79,6 +99,25 @@ def choose_color(message):
     else:
         M_send_to_arduino(text, message)
         # bot.reply_to(message, "Не понял команду, выберите цвет на клавиатуре или /rgb R G B")
+    """
+
+
+def M_send_to_arduino(type, message):
+    cmd = f"{type}\n"  # Формируем команду для Arduino
+    try:
+        ser.write(cmd.encode())  # TODO TEST отправить число 3
+        # Ждем ответа от Arduino
+        time.sleep(0.5)
+
+        resp = ser.readline().decode().strip()
+        print(f"Ответ от Arduino для отладки: {resp}")  # Для отладки
+        # Проверяем ответ от Arduino
+        #if resp.startswith("OK"):
+        #    bot.reply_to(message, f"Установлен цвет TYPE={type}")
+        #else:
+        #    bot.reply_to(message, "Нет ответа от Arduino1")
+    except Exception as e:
+        bot.reply_to(message, f"Ошибка отправки на Arduino: {e}")
 
 """
 def send_mode1_to_arduino(message): # TODO ??
@@ -94,28 +133,8 @@ def send_mode1_to_arduino(message): # TODO ??
         bot.reply_to(message, f"Ошибка отправки на Arduino: {e}")
 """
 
-def M_send_to_arduino(type, message):
-    cmd = f"{type}\n"  # Формируем команду для Arduino
-    try:
-        print(f"Отправка на Arduino: {cmd.strip()}")
-        ser.write(cmd.encode())  # TODO TEST отправить число 3
-        print(f"Отправлено на Arduino: {cmd.strip()}") # 10/5
-        # Ждем ответа от Arduino
-        time.sleep(0.1)
-        resp = ser.readline().decode().strip()
-        if resp.startswith("OK"):
-            bot.reply_to(message, f"Установлен цвет TYPE={type}")
-        else:
-            bot.reply_to(message, "Нет ответа от Arduino")
-    except Exception as e:
-        bot.reply_to(message, f"Ошибка отправки на Arduino: {e}")
-
-
-def sum(a, b):  
-    return a + b    
-
 if __name__ == '__main__':
     print("Бот запущен...")
-    ser.write(b"131\n")  # Отправляем команду на Arduino для установки цвета CYAN
+
     time.sleep(0.1)  # Ждем ответа от Arduino
     bot.infinity_polling()

@@ -12,7 +12,7 @@ void setRGB(int _r, int _g, int _b); // ← добавьте эту строку
 
 
 volatile byte ledMode = 2;
-int max_bright = 100;          // максимальная яркость (0 - 255)
+int max_bright = 10;          // максимальная яркость (0 - 255)
 
 int thisdelay = 20;          //-FX LOOPS DELAY VAR
 int thisstep = 10;           //-FX LOOPS DELAY VAR
@@ -97,8 +97,10 @@ void loop() {
     case 8: M_color(255, 0, 0); break; // RED
     case 50: pulse_one_color_all(); break;//color(255, 0, 255); break;            // цвет    
     case 128: M_color(246,118,142); break; // pink 
-    case 130: M_flash(); break; // pink
-    case 131: fill_solid(leds, LED_COUNT, CRGB::Cyan);  // Устанавливаем первый светодиод в цвет CYAN
+
+    case 129: M_color(255, 165, 0); break; // orange
+    case 130: M_flash(); break; 
+    case 131: fill_solid(leds, LED_COUNT, CRGB::Cyan); break;  // Устанавливаем первый светодиод в цвет CYAN
   }
 }
 
