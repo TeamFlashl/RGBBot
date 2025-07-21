@@ -1,5 +1,5 @@
 #pragma once
-#include <Arduino.h>
+//#include <Arduino.h>
 #include "analog.h"
 
 const int pinR = 8;   // PWM-канал для красного

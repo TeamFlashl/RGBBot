@@ -27,14 +27,14 @@ byte fav_modes[] = {2, 11, 14, 25, 27, 30, 41};  // список "любимых
 byte num_modes = sizeof(fav_modes);         // получить количество "любимых" режимов (они все по 1 байту..)
 unsigned long change_time, last_change, last_bright;
 int new_bright;
-
+/*
 // цвета мячиков для режима
 byte ballColors[3][3] = {
   {0xff, 0, 0},
   {0xff, 0xff, 0xff},
   {0   , 0   , 0xff}
 };
-
+*/
 // ---------------СЛУЖЕБНЫЕ ПЕРЕМЕННЫЕ-----------------
 int BOTTOM_INDEX = 0;        // светодиод начала отсчёта
 int TOP_INDEX = int(LED_COUNT / 2);
@@ -66,7 +66,7 @@ void setup() {
 
   LEDS.addLeds<WS2811, LED_DT, GRB>(leds, LED_COUNT);  // настрйоки для нашей ленты (ленты на WS2811, WS2812, WS2812B)
 
-  fill_solid(leds, LED_COUNT, CRGB::Black); // one_color_all(0, 0, 0);          // погасить все светодиоды
+  fill_solid(leds, LED_COUNT, CRGB::YELLOW); // one_color_all(0, 0, 0);          // погасить все светодиоды
   LEDS.show();                     // отослать команду
 
   randomSeed(analogRead(0));
@@ -77,7 +77,7 @@ void setup() {
 }
 
 void loop() { 
-  setRGB(0, 0, 0); // выключаем ленту, если ничего не пришло
+  setRGB(0, 0, 0);
 
   if (Serial.available()) {     // если что то прислали
     setRGB(0, 0, 255);
