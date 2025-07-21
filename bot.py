@@ -80,8 +80,9 @@ def choose_color(message):
 
 def read_arduino_response(message):
     try:
-        time.sleep(0.1)
-        resp = ser.readline().decode().strip()
+        time.sleep(2)
+        #resp = ser.readline().decode().strip()
+        resp = ser.read_all().decode().strip()
         print(f"Ответ от Arduino для отладки: {resp}")
         # Uncomment if you want to send response back to user
         #if resp["Response"]:
