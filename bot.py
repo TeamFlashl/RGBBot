@@ -24,7 +24,24 @@ except Exception as e:
     print("Не удалось открыть порт:", e)
     exit(1)
 
+def start_serial():
+    if not ser.is_open:
+        try:
+            ser.open()
+            time.sleep(2)
+            print(f"Открыт порт {SERIAL_PORT} @ {BAUDRATE}")
+        except Exception as e:
+            print("Не удалось открыть порт:", e)
+            exit(1)
+
+def stop_serial():
+    if ser.is_open:
+        ser.close()
+        print(f"Закрыт порт {SERIAL_PORT}")
+
+
 # ===== Структура меню =====
+"""
 menuItems = {
     "🔴 Красный": {"id": "red", "command": "mode 1", "visible": True},
     "🟢 Зелёный": {"id": "green", "command": "mode 2", "visible": True},
@@ -35,13 +52,27 @@ menuItems = {
     "🟣 Розовый":   {"id": "magenta", "command": "mode 5", "visible": True},
     "🩵 Голубой":{"id": "cyan", "command": "mode 6", "visible": True},
 }
+"""
+menuItems = {
+    "buttonRed":        {"label": "🔴 Красный", "id": "red", "command": "mode 1", "visible": True},
+    "buttonGreen":      {"label": "🟢 Зелёный", "id": "green", "command": "mode 2", "visible": True},
+    "buttonBlue":       {"label": "🔵 Синий", "id": "blue", "command": "mode 3", "visible": True},
+    "buttonWhite":      {"label": "⚪️ Белый", "id": "white", "command": "mode 7", "visible": True},
+    "buttonBlack":      {"label": "⚫️ Чёрный", "id": "black", "command": "mode 0", "visible": True},
+    "buttonYellow":     {"label": "🟡 Жёлтый", "id": "yellow", "command": "mode 4", "visible": True},
+    "buttonMagenta":    {"label": "🟣 Розовый", "id": "magenta", "command": "mode 5", "visible": True},
+    "buttonCyan":       {"label": "🩵 Голубой", "id": "cyan", "command": "mode 6", "visible": True},
+}
+
+
 
 # ===== Построение клавиатуры =====
 def build_main_keyboard() -> types.ReplyKeyboardMarkup:
     kb_builder = ReplyKeyboardBuilder()
-    for text, item in menuItems.items():
+    for item in menuItems.values():
         if item["visible"]:
-            kb_builder.button(text=text)
+            # используем текст из поля "label"
+            kb_builder.button(text=item["label"])
     kb_builder.adjust(5)  # по 5 кнопок в ряд
     return kb_builder.as_markup(resize_keyboard=True)
 
@@ -98,7 +129,7 @@ async def cmd_rgb(message: types.Message):
         await message.reply(f"Отправил: {r},{g},{b}")
     except Exception as e:
         await message.reply(f"Ошибка: {e}")
-
+"""
 @router.message()
 async def choose_color(message: types.Message, bot: Bot):
     item = menuItems.get(message.text)
@@ -108,6 +139,26 @@ async def choose_color(message: types.Message, bot: Bot):
     if cmd_value is None:
         return await message.reply("Команда не задана")
     await message.reply(f"Выбрали {message.text}, шлём {cmd_value}")
+    send_to_arduino(cmd_value, message.chat.id, bot)
+"""
+
+@router.message()
+async def choose_color(message: types.Message, bot: Bot):
+    # ищем в menuItems по text == item["label"]
+    selected = None
+    for item in menuItems.values():
+        if item["label"] == message.text:
+            selected = item
+            break
+
+    if not selected:
+        return await message.reply("Не понял, выберите цвет на клавиатуре")
+
+    cmd_value = selected.get("command")
+    if cmd_value is None:
+        return await message.reply("Команда не задана")
+
+    await message.reply(f"Выбрали {selected['label']}, шлём {cmd_value}")
     send_to_arduino(cmd_value, message.chat.id, bot)
 
 # ===== Запуск приложения =====

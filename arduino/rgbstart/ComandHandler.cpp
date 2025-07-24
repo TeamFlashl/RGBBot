@@ -1,6 +1,8 @@
 #include "CommandHandler.h"
+#include "Analog.h"
 
-void handleSerialCommands(String command, volatile int *ledMode, RGB8 *currentColor) {    
+void handleSerialCommands(String command, volatile int *ledMode, RGB8 *currentColor) {  
+  setRGB(255,255,255);  
   command.trim();           
   if (command.length() == 0) return;
 

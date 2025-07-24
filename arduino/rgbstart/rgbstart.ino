@@ -8,7 +8,7 @@
 #define LED_COUNT 90          // число светодиодов
 #define LED_DT    3           // пин DIN ленты
 
-void setRGB(int _r, int _g, int _b); // ← добавьте эту строку в начало файла
+//void setRGB(int _r, int _g, int _b); // ← добавьте эту строку в начало файла
 
 
 volatile int ledMode = 2;
@@ -79,6 +79,9 @@ void setup() {
   setupLEDEffect(LED_COUNT); // Инициализация LED эффектов с количеством светодиодов
 }
 
+const size_t bufSize = 50;
+char buf[bufSize + 1];  // +1 для завершающего нуля
+
 void loop() { 
   setRGB(0, 0, 0);
   //Serial.println("Waiting for commands..."); 
@@ -95,8 +98,12 @@ void loop() {
 */
   if (Serial.available()) {
     setRGB(0,0,255);
+    Serial.setTimeout(50);
     String command = Serial.readString();
+      
+    setRGB(0,255,255);
     handleSerialCommands(command, &ledMode, &rgbMode);
+    //setRGB(0,255,255);
   }
 
   switch (ledMode) {
