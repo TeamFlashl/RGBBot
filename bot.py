@@ -41,18 +41,6 @@ def stop_serial():
 
 
 # ===== Структура меню =====
-"""
-menuItems = {
-    "🔴 Красный": {"id": "red", "command": "mode 1", "visible": True},
-    "🟢 Зелёный": {"id": "green", "command": "mode 2", "visible": True},
-    "🔵 Синий":   {"id": "blue", "command": "mode 3", "visible": True},
-    "⚪️ Белый":   {"id": "white", "command": "mode 7", "visible": True},
-    "⚫️ Чёрный":  {"id": "black", "command": "mode 0", "visible": True},
-    "🟡 Жёлтый":    {"id": "yellow", "command": "mode 4", "visible": True},
-    "🟣 Розовый":   {"id": "magenta", "command": "mode 5", "visible": True},
-    "🩵 Голубой":{"id": "cyan", "command": "mode 6", "visible": True},
-}
-"""
 menuItems = {
     "buttonRed":        {"label": "🔴 Красный", "id": "red", "command": "mode 1", "visible": True},
     "buttonGreen":      {"label": "🟢 Зелёный", "id": "green", "command": "mode 2", "visible": True},
@@ -129,18 +117,6 @@ async def cmd_rgb(message: types.Message):
         await message.reply(f"Отправил: {r},{g},{b}")
     except Exception as e:
         await message.reply(f"Ошибка: {e}")
-"""
-@router.message()
-async def choose_color(message: types.Message, bot: Bot):
-    item = menuItems.get(message.text)
-    if not item:
-        return await message.reply("Не понял, выберите цвет на клавиатуре")
-    cmd_value = item.get("command")
-    if cmd_value is None:
-        return await message.reply("Команда не задана")
-    await message.reply(f"Выбрали {message.text}, шлём {cmd_value}")
-    send_to_arduino(cmd_value, message.chat.id, bot)
-"""
 
 @router.message()
 async def choose_color(message: types.Message, bot: Bot):
