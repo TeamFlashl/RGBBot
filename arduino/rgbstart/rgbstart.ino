@@ -1,8 +1,8 @@
 // ----- arduino_rgb_bot.ino -----
 #include <Arduino.h>
-#include "FastLED.h"          // библиотека для работы с лентой
+#include <FastLED.h>          // библиотека для работы с лентой
 #include "analog.h" // Подключаем файл с функциями для работы с RGB лампочками
-//#include "LEDEffect.ino"
+#include "CommandHandler.h"
 
 #define LEDS      FastLED     // опционально, чтобы писать LEDS.…
 #define LED_COUNT 90          // число светодиодов
@@ -11,8 +11,11 @@
 void setRGB(int _r, int _g, int _b); // ← добавьте эту строку в начало файла
 
 
-volatile byte ledMode = 2;
+volatile int ledMode = 2;
+//volatile byte ledMode = 2;
 int max_bright = 10;          // максимальная яркость (0 - 255)
+//struct RGB8 { uint8_t r, g, b; };
+RGB8  rgbMode;
 
 int thisdelay = 20;          //-FX LOOPS DELAY VAR
 int thisstep = 10;           //-FX LOOPS DELAY VAR
@@ -42,10 +45,10 @@ int EVENODD = LED_COUNT % 2;
 struct CRGB leds[LED_COUNT];
 int ledsX[LED_COUNT][3];     //-ARRAY FOR COPYING WHATS IN THE LED STRIP CURRENTLY (FOR CELL-AUTOMATA, MARCH, ETC)
 
-int thisindex = 0;
-int thisRED = 0;
-int thisGRN = 0;
-int thisBLU = 0;
+//int thisindex = 0;
+//int thisRED = 0;
+//int thisGRN = 0;
+//int thisBLU = 0;
 
 int idex = 0;                //-LED INDEX (0 to LED_COUNT-1
 int ihue = 0;                //-HUE (0-255)
@@ -66,7 +69,7 @@ void setup() {
 
   LEDS.addLeds<WS2811, LED_DT, GRB>(leds, LED_COUNT);  // настрйоки для нашей ленты (ленты на WS2811, WS2812, WS2812B)
 
-  fill_solid(leds, LED_COUNT, CRGB::YELLOW); // one_color_all(0, 0, 0);          // погасить все светодиоды
+  fill_solid(leds, LED_COUNT, CRGB::Yellow); // Зажечь желтый
   LEDS.show();                     // отослать команду
 
   randomSeed(analogRead(0));
@@ -78,12 +81,22 @@ void setup() {
 
 void loop() { 
   setRGB(0, 0, 0);
+  //Serial.println("Waiting for commands..."); 
 
+/*
   if (Serial.available()) {     // если что то прислали
     setRGB(0, 0, 255);
-    ledMode = Serial.parseInt();    // парсим в тип данных int
+    ledMode = Serial.readString().toInt();    // парсим в тип данных int
+    Serial.print("Mode: ");
+    Serial.println(ledMode);
     change_mode(ledMode);           // меняем режим через change_mode (там для каждого режима стоят цвета и задержки)
     //Serial.flush(); // очищаем буфер после отправки команды
+  }
+*/
+  if (Serial.available()) {
+    setRGB(0,0,255);
+    String command = Serial.readString();
+    handleSerialCommands(command, &ledMode, &rgbMode);
   }
 
   switch (ledMode) {
@@ -96,12 +109,13 @@ void loop() {
     case 6: setColor(0, 255, 255); break; // CYAN
     case 7: setColor(255, 255, 255); break; // WHITE
     case 8: setColor(255, 0, 0); break; // RED
-    case 50: pulse_one_color_all(); break;//color(255, 0, 255); break;            // цвет    
+  //  case 50: pulse_one_color_all(); break;//color(255, 0, 255); break;            // цвет    
     case 128: setColor(246,118,142); break; // pink 
 
     case 129: setColor(255, 165, 0); break; // orange
     //case 130: M_flash(); break; 
-    case 131: fill_solid(leds, LED_COUNT, CRGB::Cyan); break;  // Устанавливаем первый светодиод в цвет CYAN
+  //  case 131: fill_solid(leds, LED_COUNT, CRGB::Cyan); break;  // Устанавливаем первый светодиод в цвет CYAN
+    case 999: setColor(rgbMode.r, rgbMode.g, rgbMode.b); break;
   }
 }
 
@@ -109,7 +123,8 @@ void btnISR() {
   if (millis() - btnTimer > 150) {
     btnTimer = millis();  // защита от дребезга
     if (++modeCounter >= num_modes) modeCounter = 0;
-    ledMode = fav_modes[modeCounter];    // получаем новый номер следующего режима
+    //ledMode = fav_modes[modeCounter];    // получаем новый номер следующего режима
+    ledMode = 8;
     change_mode(ledMode);               // меняем режим через change_mode (там для каждого режима стоят цвета и задержки)    
     changeFlag = true;
   }
